@@ -1,67 +1,321 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV - Nur Muhammad Wafa</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Tailwind gray-100 */
-            color: #111827; /* Tailwind gray-900 */
-        }
-        
-        /* Layout untuk mensimulasikan kertas A4 di layar komputer */
-        .a4-container {
-            max-width: 210mm; /* A4 width */
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CV - Nur Muhammad Wafa</title>
+<style>
+  @page { size: A4; margin: 0; }
 
-        /* Styling khusus agar link tetap terlihat bagus saat dicetak */
-        a {
-            color: #000;
-            text-decoration: none;
-        }
+  * { box-sizing: border-box; }
 
-        /* Saat menggenerate PDF atau di-print, hilangkan shadow dan margin luar */
-        @media print {
-            body {
-                background-color: white;
-            }
-            .a4-container {
-                box-shadow: none;
-                margin: 0;
-                max-width: 100%;
-            }
-            #download-btn-container {
-                display: none !important;
-            }
-        }
-    </style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #6b6e70;
+    font-family: 'Times New Roman', Times, 'Liberation Serif', 'Noto Serif', serif;
+    color: #000;
+  }
+
+  /* ---------- On-screen toolbar (hidden on print) ---------- */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #2b2d2f;
+    color: #eee;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  .toolbar button {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .toolbar button:hover { background: #2563eb; }
+  .toolbar span { opacity: .85; }
+
+  /* ---------- Page ---------- */
+  .page {
+    width: 210mm;
+    height: 297mm;
+    padding: 2.6cm 1.85cm;
+    margin: 16px auto;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media print {
+    html, body { background: none; }
+    .toolbar { display: none !important; }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      width: auto;
+      height: 297mm;
+      page-break-after: always;
+      overflow: visible;
+    }
+    .page:last-child { page-break-after: auto; }
+  }
+
+  /* ---------- Header ---------- */
+  .name {
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 4pt;
+  }
+  .contact, .links {
+    font-size: 9.5pt;
+    text-align: center;
+    margin: 0 0 2pt;
+  }
+  .header { margin-bottom: 7pt; }
+
+  /* ---------- Section titles ---------- */
+  .section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 10pt 0 0;
+    padding-bottom: 3pt;
+    border-bottom: 1.1pt solid #000;
+  }
+  .section:first-of-type .section-title { margin-top: 0; }
+
+  .section-body { margin-top: 6pt; }
+
+  /* ---------- Body text ---------- */
+  p.justify {
+    font-size: 10pt;
+    text-align: justify;
+    line-height: 1.28;
+    margin: 0;
+  }
+
+  ul.bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul.bullets li {
+    position: relative;
+    padding-left: 13pt;
+    font-size: 10pt;
+    text-align: justify;
+    line-height: 1.28;
+    margin-bottom: 3pt;
+  }
+  ul.bullets li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+  }
+  ul.bullets li:last-child { margin-bottom: 0; }
+
+  /* ---------- Two-column skills grid ---------- */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 18pt;
+  }
+
+  /* ---------- Experience / Education entries ---------- */
+  .entry { margin-top: 7pt; }
+  .entry:first-child { margin-top: 0; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10pt;
+  }
+  .row .org   { font-size: 10.5pt; font-weight: bold; }
+  .row .place { font-size: 10pt;   font-weight: bold; white-space: nowrap; }
+  .row .role  { font-size: 10pt;   font-style: italic; }
+  .row .date  { font-size: 9.5pt;  font-style: italic; white-space: nowrap; }
+  .row .date.bold { font-style: normal; font-weight: bold; }
+
+  .entry .bullets { margin-top: 4pt; }
+</style>
 </head>
-<body class="py-10 px-4 sm:px-8">
+<body>
 
-    <div id="cv-wrapper" class="a4-container p-8 sm:p-12 mb-8">
-        <!-- Konten CV akan dirender oleh JavaScript di sini -->
-        <div id="cv-content"></div>
+  <div class="toolbar">
+    <button onclick="window.print()">🖨️ Print / Simpan sebagai PDF</button>
+    <span>Pastikan pada dialog print: Paper size <strong>A4</strong>, Margins <strong>None/Default</strong>, Scale <strong>100%</strong>.</span>
+  </div>
+
+  <!-- ===================== PAGE 1 ===================== -->
+  <div class="page">
+    <div class="header">
+      <p class="name">Nur Muhammad Wafa</p>
+      <p class="contact">+62 813-2995-7959 | wafamuh529@gmail.com | Purworejo, Central Java, Indonesia</p>
+      <p class="links">LinkedIn: linkedin.com/in/nmwafa | GitHub: github.com/nmwafa | Portfolio: maswafa.is-a.dev</p>
     </div>
 
-    <!-- <div id="download-btn-container" class="flex justify-center mt-6 mb-12">
-        <button id="download-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-            Download PDF
-        </button>
-    </div> -->
+    <div class="section">
+      <h2 class="section-title">PROFILE</h2>
+      <div class="section-body">
+        <p class="justify">Dedicated and detail-oriented Cybersecurity Specialist with hands-on expertise in Web Application Penetration Testing, Vulnerability Assessment, and Linux System Hardening. Proven track record in identifying critical flaws following OWASP WSTG standards, executing ethical exploitation, and delivering actionable technical remediation reports. Experienced in secure backend development, network security, and automated recon scripting. Eager to contribute practical technical competence and analytical rigor to protect enterprise systems and web applications against emerging cyber threats.</p>
+      </div>
+    </div>
 
-    <script src=script.js></script>
+    <div class="section">
+      <h2 class="section-title">TECHNICAL SKILLS AND STRENGTHS</h2>
+      <div class="section-body skills-grid">
+        <ul class="bullets">
+          <li>Web Pentesting (OWASP Top 10, OWASP WSTG)</li>
+          <li>Vulnerability Assessment &amp; Bug Hunting (VDP)</li>
+          <li>Burp Suite, ZAP, SQLmap, Nuclei</li>
+          <li>Nmap, Wireshark, Subfinder, httpx, ffuf</li>
+          <li>Secure Code Review &amp; Remediation Guidelines</li>
+          <li>API Security Testing</li>
+        </ul>
+        <ul class="bullets">
+          <li>Linux Server Hardening (Debian, Ubuntu, RHEL)</li>
+          <li>SELinux, UFW, IPTables &amp; fail2ban</li>
+          <li>Network Security &amp; Routing (MikroTik RouterOS)</li>
+          <li>Python Automation, Bash Scripting &amp; SQL</li>
+          <li>Backend &amp; Web Security (PHP, Laravel, MySQL)</li>
+          <li>Technical Documentation &amp; CVSS Risk Scoring</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">EXPERIENCE</h2>
+      <div class="section-body">
+
+        <div class="entry">
+          <div class="row">
+            <span class="org">PT Winnicode Garuda Teknologi</span>
+            <span class="place">Indonesia</span>
+          </div>
+          <div class="row">
+            <span class="role">Back-End Developer &amp; System Support Intern</span>
+            <span class="date">February 2025 – June 2025</span>
+          </div>
+          <ul class="bullets">
+            <li>Engineered secure server-side logic and RESTful API endpoints for news portal architectures utilizing PHP (Laravel) and MySQL.</li>
+            <li>Implemented stringent security measures including Role-Based Access Control (RBAC), password hashing algorithms, and query sanitization to eliminate SQL Injection risks.</li>
+            <li>Configured rate limiting on sensitive API endpoints to mitigate brute force attacks and enforced Broken Access Control (BAC) defenses.</li>
+          </ul>
+        </div>
+
+        <div class="entry">
+          <div class="row">
+            <span class="org">PT Teknologi Server Indonesia (X-code)</span>
+            <span class="place">Indonesia</span>
+          </div>
+          <div class="row">
+            <span class="role">Web Penetration Tester Intern</span>
+            <span class="date">November 2024 – January 2025</span>
+          </div>
+          <ul class="bullets">
+            <li>Executed periodic blackbox web application penetration testing and vulnerability assessments in strict alignment with OWASP WSTG methodologies.</li>
+            <li>Authored formal penetration testing reports detailing executive summaries, step-by-step Proof of Concept (PoC), CVSS risk severity ratings, and actionable remediation steps.</li>
+            <li>Performed post-remediation verification testing (re-testing) to validate the effectiveness of implemented security patches.</li>
+          </ul>
+        </div>
+
+        <div class="entry">
+          <div class="row">
+            <span class="org">Responsible Vulnerability Disclosure Programs</span>
+            <span class="place">Indonesia</span>
+          </div>
+          <div class="row">
+            <span class="role">Independent Security Researcher</span>
+            <span class="date">2025 – Present</span>
+          </div>
+          <ul class="bullets">
+            <li>Participated ethically in public Vulnerability Disclosure Programs (VDP), responsibly reporting verified vulnerabilities across educational and public sector web assets.</li>
+            <li>Awarded official Letter of Appreciation (LoA) for responsible reporting of several vulnerability type reported.</li>
+            <li>Ranked in the TOP 15 Finalists of the Helium Challenge Batch 3 Penetration Testing Competition (Cyber Academy, June 2026) out of nationwide participants.</li>
+            <li>Solved hands-on exploitation challenges on PortSwigger Web Security Academy and Hack The Box, focusing on advanced modern web attack vectors.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PAGE 2 ===================== -->
+  <div class="page">
+
+    <div class="section">
+      <h2 class="section-title">KEY PROJECTS &amp; PRACTICAL IMPLEMENTATIONS</h2>
+      <div class="section-body">
+        <ul class="bullets">
+          <li><strong>Automated AI Library System Integration:</strong> Developed a web-based library management platform integrated with Meta's Llama 3 LLM via API for real-time natural language catalog querying and user assistance, with robust prompt sanitization and role-based data isolation.</li>
+          <li><strong>Cybersecurity Tools &amp; Reconnaissance Automation (maswafa.is-a.dev/tools):</strong> Engineered custom Python scripts and a web-based Google Dorking repository (900+ queries across 23 categories) to streamline automated reconnaissance and attack surface discovery.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">EDUCATION &amp; QUALIFICATION</h2>
+      <div class="section-body">
+
+        <div class="entry">
+          <div class="row">
+            <span class="org">Universitas Muhammadiyah Purworejo</span>
+            <span class="date bold">2022 – 2026</span>
+          </div>
+          <div class="row">
+            <span class="role">Bachelor of Information Technology</span>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="row">
+            <span class="org">Universitas Putra Bangsa</span>
+            <span class="date bold">2023 – 2024</span>
+          </div>
+          <div class="row">
+            <span class="role">Computer Science (Student Exchange Program)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">CERTIFICATIONS &amp; ACHIEVEMENTS</h2>
+      <div class="section-body">
+        <ul class="bullets">
+          <li><strong>Cyber Sentinel Secure (CSS):</strong> 6-Month Intensive Web Application Security Bootcamp (6 Stages with Multi-Vulnerability Assessments) — cybersentinelsecure.asia (Sep 2024)</li>
+          <li><strong>Google Cybersecurity Professional Certificate:</strong> 8-Course Specialization: Network Security, Linux, SQL, SIEM/IDS, Threat Mitigation, Python Automation — Coursera (Nov 2025)</li>
+          <li><strong>Ethical Hacker Certification:</strong> Methodological Penetration Testing, Exploitation &amp; Reporting — Cisco Networking Academy (Mar 2025)</li>
+          <li><strong>Google IT Support Professional Certificate:</strong> System Administration, Networking, OS, and Security Fundamentals — Coursera (Sep 2026)</li>
+          <li><strong>Certified Cybersecurity Educator Professional (CCEP):</strong> Red Team Leaders — (Dec 2025)</li>
+          <li><strong>TOP 15 Finalist – Helium Challenge Batch 3:</strong> National Penetration Testing Competition — Cyber Academy (June 2026)</li>
+          <li><strong>Red Hat System Administration I &amp; II (RH124 / RH134):</strong> RHEL Administration, LVM Storage, SELinux, Systemd, and Enterprise Hardening (June - july 2026)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">LANGUAGES</h2>
+      <div class="section-body">
+        <p class="justify">Indonesian, English</p>
+      </div>
+    </div>
+
+  </div>
+
 </body>
 </html>
